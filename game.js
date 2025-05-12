@@ -17,7 +17,7 @@ const gameState = {
     upgrades: {
         backpack: { name: "Backpack Upgrade", description: "Increase drug carrying capacity by 20%", price: 500, bought: false, effect: () => { Object.values(gameState.drugs).forEach(drug => drug.maxOwned = Math.floor(drug.maxOwned * 1.2)); } },
         car: { name: "Delivery Car", description: "Workers sell drugs 25% faster", price: 1500, bought: false, effect: () => { gameState.workers.forEach(worker => worker.sellSpeed *= 0.75); } },
-        gun: { name: "Protection", description: "Reduce chance of police bust by 30%", price: 2000, bought: false, effect: () => { /* Implementation would go here */ } },
+        gun: { name: "Protection", description: "Reduce chance of police bust by 50%", price: 2000, bought: false },
         phone: { name: "Burner Phones", description: "Workers can carry more drugs", price: 1000, bought: false, effect: () => { gameState.workers.forEach(worker => worker.capacity += 2); } }
     },
     properties: {
@@ -25,10 +25,12 @@ const gameState = {
         warehouse: { name: "Warehouse", description: "Doubles drug storage capacity", price: 10000, owned: false, effect: () => { Object.values(gameState.drugs).forEach(drug => drug.maxOwned *= 2); } },
         lab: { name: "Meth Lab", description: "Produces 1 meth every 10 seconds", price: 15000, owned: false, effect: () => { setInterval(() => gameState.drugs.meth.owned++, 10000); } }
     },
-    lastUpdate: Date.now()
+    lastUpdate: Date.now(),
+    bustChance: 0.005, // 0.5% chance per worker per tick
+    protection: 0 // Starts at 0%, gun upgrade adds 50%
 };
 
-// Worker names
+// Worker names (same as before)
 const firstNames = ["Devin", "Jamal", "Tyrone", "Lamar", "Darnell", "Malik", "Terrell", "Andre", "Dante", "Marquis", "Shawn", "Raymond", "Quinton", "Darius", "Reggie", "Tevin", "Kareem", "Jermaine", "Deshawn", "Leon"];
 const lastNames = ["Williams", "Johnson", "Brown", "Jackson", "Davis", "Wilson", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young"];
 
@@ -46,7 +48,7 @@ function initGame() {
 // Game loop
 function gameLoop() {
     const now = Date.now();
-    const deltaTime = (now - gameState.lastUpdate) / 1000; // Convert to seconds
+    const deltaTime = (now - gameState.lastUpdate) / 1000;
     gameState.lastUpdate = now;
     
     // Calculate income from workers
@@ -54,10 +56,15 @@ function gameLoop() {
     gameState.workers.forEach(worker => {
         if (worker.assignedDrug && gameState.drugs[worker.assignedDrug].owned > 0) {
             const sellAmount = Math.min(worker.capacity, gameState.drugs[worker.assignedDrug].owned);
-            const profit = sellAmount * (gameState.drugs[worker.assignedDrug].sellPrice - gameState.drugs[worker.assignedDrug].price);
+            const profit = sellAmount * gameState.drugs[worker.assignedDrug].sellPrice; // Now only get sell price
             
             gameState.drugs[worker.assignedDrug].owned -= sellAmount;
             incomeThisTick += profit / worker.sellSpeed;
+            
+            // Check for police bust
+            if (Math.random() < (gameState.bustChance * (1 - gameState.protection))) {
+                bustWorker(worker);
+            }
         }
     });
     
@@ -74,32 +81,39 @@ function gameLoop() {
     updateUI();
 }
 
-// Generate random workers
+// Police bust a worker
+function bustWorker(worker) {
+    const workerIndex = gameState.workers.findIndex(w => w.id === worker.id);
+    if (workerIndex !== -1) {
+        gameState.workers.splice(workerIndex, 1);
+        showNotification(`🚨 ${worker.name} got arrested by the police!`, "error");
+    }
+}
+
+// Generate random workers (same as before)
 function generateWorkers() {
     gameState.availableWorkers = [];
-    
-    const workerCount = 5 + Math.floor(Math.random() * 3); // 5-7 workers
+    const workerCount = 5 + Math.floor(Math.random() * 3);
     
     for (let i = 0; i < workerCount; i++) {
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const name = `${firstName} "${lastName.charAt(0)}" ${lastName}`;
         
-        // Determine worker type
         let type, price, capacity, sellSpeed;
         const rand = Math.random();
         
-        if (rand < 0.6) { // 60% chance for regular worker
+        if (rand < 0.6) {
             type = "worker";
             price = 100 + Math.floor(Math.random() * 200);
             capacity = 1 + Math.floor(Math.random() * 2);
             sellSpeed = 5 + Math.random() * 5;
-        } else if (rand < 0.9) { // 30% chance for goon
+        } else if (rand < 0.9) {
             type = "goon";
             price = 300 + Math.floor(Math.random() * 300);
             capacity = 2 + Math.floor(Math.random() * 3);
             sellSpeed = 3 + Math.random() * 3;
-        } else { // 10% chance for street rat
+        } else {
             type = "street-rat";
             price = 50 + Math.floor(Math.random() * 100);
             capacity = 1;
@@ -120,7 +134,7 @@ function generateWorkers() {
     updateWorkersUI();
 }
 
-// Update all UI elements
+// Update UI functions (same as before, just remove animation-related code)
 function updateUI() {
     updateMoneyUI();
     updateDrugsUI();
@@ -142,14 +156,12 @@ function updateDrugsUI() {
     inventoryEl.innerHTML = "";
     
     Object.entries(gameState.drugs).forEach(([id, drug]) => {
-        // Buy drug card
         const buyCard = document.createElement("div");
         buyCard.className = "drug-card";
         buyCard.innerHTML = `
             <div class="drug-name">${drug.name}</div>
             <div class="drug-price">Buy Price: $${formatNumber(drug.price)}</div>
             <div class="drug-sell-price">Sell Price: $${formatNumber(drug.sellPrice)}</div>
-            <div class="drug-profit">Profit: $${formatNumber(drug.sellPrice - drug.price)}</div>
             <button class="buy-btn" data-drug="${id}">
                 <i class="fas fa-cart-plus"></i> Buy (1)
             </button>
@@ -159,14 +171,12 @@ function updateDrugsUI() {
         `;
         buyDrugsEl.appendChild(buyCard);
         
-        // Inventory card
         if (drug.owned > 0) {
             const invCard = document.createElement("div");
             invCard.className = "drug-card";
             invCard.innerHTML = `
                 <div class="drug-name">${drug.name}</div>
                 <div class="drug-quantity">Owned: ${formatNumber(drug.owned)}/${formatNumber(drug.maxOwned)}</div>
-                <div class="drug-price">Value: $${formatNumber(drug.owned * drug.sellPrice)}</div>
                 <button class="sell-btn" data-drug="${id}">
                     <i class="fas fa-money-bill-wave"></i> Sell (1)
                 </button>
@@ -178,7 +188,6 @@ function updateDrugsUI() {
         }
     });
     
-    // Add event listeners to new buttons
     document.querySelectorAll(".buy-btn").forEach(btn => {
         btn.addEventListener("click", () => buyDrug(btn.dataset.drug, 1));
     });
@@ -203,7 +212,6 @@ function updateWorkersUI() {
     hireWorkersEl.innerHTML = "";
     yourWorkersEl.innerHTML = "";
     
-    // Available workers to hire
     gameState.availableWorkers.forEach(worker => {
         const workerCard = document.createElement("div");
         workerCard.className = "worker-card";
@@ -222,7 +230,6 @@ function updateWorkersUI() {
         hireWorkersEl.appendChild(workerCard);
     });
     
-    // Hired workers
     gameState.workers.forEach(worker => {
         const workerCard = document.createElement("div");
         workerCard.className = "worker-card";
@@ -240,14 +247,12 @@ function updateWorkersUI() {
                 ${assignedDrugInfo}<br>
                 Speed: ${worker.sellSpeed.toFixed(1)}s/unit<br>
             </div>
-            <div class="worker-assign">
-                <select class="assign-drug" data-worker-id="${worker.id}">
-                    <option value="">-- Assign Drug --</option>
-                    ${Object.entries(gameState.drugs).map(([id, drug]) => 
-                        `<option value="${id}" ${worker.assignedDrug === id ? "selected" : ""}>${drug.name}</option>`
-                    ).join("")}
-                </select>
-            </div>
+            <select class="assign-drug" data-worker-id="${worker.id}">
+                <option value="">-- Assign Drug --</option>
+                ${Object.entries(gameState.drugs).map(([id, drug]) => 
+                    `<option value="${id}" ${worker.assignedDrug === id ? "selected" : ""}>${drug.name}</option>`
+                ).join("")}
+            </select>
             <button class="fire-btn" data-worker-id="${worker.id}">
                 <i class="fas fa-user-minus"></i> Fire
             </button>
@@ -255,7 +260,6 @@ function updateWorkersUI() {
         yourWorkersEl.appendChild(workerCard);
     });
     
-    // Add event listeners
     document.querySelectorAll(".hire-btn").forEach(btn => {
         btn.addEventListener("click", () => hireWorker(parseInt(btn.dataset.workerId)));
     });
@@ -319,7 +323,7 @@ function updatePropertiesUI() {
     });
 }
 
-// Game actions
+// Game actions (updated for proper selling)
 function buyDrug(drugId, amount) {
     const drug = gameState.drugs[drugId];
     const totalCost = drug.price * amount;
@@ -358,16 +362,12 @@ function sellDrug(drugId, amount) {
     updateUI();
 }
 
+// Other game actions (same as before)
 function hireWorker(workerId) {
     const workerIndex = gameState.availableWorkers.findIndex(w => w.id === workerId);
-    
-    if (workerIndex === -1) {
-        showNotification("Worker not found!", "error");
-        return;
-    }
+    if (workerIndex === -1) return;
     
     const worker = gameState.availableWorkers[workerIndex];
-    
     if (gameState.money < worker.price) {
         showNotification("Not enough money to hire this worker!", "error");
         return;
@@ -383,16 +383,10 @@ function hireWorker(workerId) {
 
 function fireWorker(workerId) {
     const workerIndex = gameState.workers.findIndex(w => w.id === workerId);
-    
-    if (workerIndex === -1) {
-        showNotification("Worker not found!", "error");
-        return;
-    }
+    if (workerIndex === -1) return;
     
     const worker = gameState.workers[workerIndex];
     gameState.workers.splice(workerIndex, 1);
-    
-    // Get some money back
     const refund = Math.floor(worker.price * 0.25);
     gameState.money += refund;
     
@@ -402,11 +396,7 @@ function fireWorker(workerId) {
 
 function assignWorkerToDrug(workerId, drugId) {
     const worker = gameState.workers.find(w => w.id === workerId);
-    
-    if (!worker) {
-        showNotification("Worker not found!", "error");
-        return;
-    }
+    if (!worker) return;
     
     worker.assignedDrug = drugId || null;
     
@@ -421,25 +411,17 @@ function assignWorkerToDrug(workerId, drugId) {
 
 function buyUpgrade(upgradeId) {
     const upgrade = gameState.upgrades[upgradeId];
-    
-    if (!upgrade) {
-        showNotification("Upgrade not found!", "error");
-        return;
-    }
-    
-    if (upgrade.bought) {
-        showNotification("You already have this upgrade!", "error");
-        return;
-    }
-    
-    if (gameState.money < upgrade.price) {
-        showNotification("Not enough money for this upgrade!", "error");
-        return;
-    }
+    if (!upgrade || upgrade.bought || gameState.money < upgrade.price) return;
     
     gameState.money -= upgrade.price;
     upgrade.bought = true;
-    upgrade.effect();
+    
+    // Special case for protection upgrade
+    if (upgradeId === 'gun') {
+        gameState.protection = 0.5; // 50% protection
+    } else if (upgrade.effect) {
+        upgrade.effect();
+    }
     
     showNotification(`Purchased ${upgrade.name} for $${formatNumber(upgrade.price)}`, "success");
     updateUI();
@@ -447,21 +429,7 @@ function buyUpgrade(upgradeId) {
 
 function buyProperty(propertyId) {
     const property = gameState.properties[propertyId];
-    
-    if (!property) {
-        showNotification("Property not found!", "error");
-        return;
-    }
-    
-    if (property.owned) {
-        showNotification("You already own this property!", "error");
-        return;
-    }
-    
-    if (gameState.money < property.price) {
-        showNotification("Not enough money for this property!", "error");
-        return;
-    }
+    if (!property || property.owned || gameState.money < property.price) return;
     
     gameState.money -= property.price;
     property.owned = true;
@@ -483,37 +451,25 @@ function showNotification(message, type = "info") {
     const notificationsEl = document.getElementById("notifications");
     const notification = document.createElement("div");
     notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div>${message}</div>
-        <div class="progress-bar"><div class="progress-bar-fill"></div></div>
-    `;
+    notification.textContent = message;
     
     notificationsEl.appendChild(notification);
-    
-    // Remove notification after animation
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 }
 
 // Event listeners
 function setupEventListeners() {
-    // Tab switching
     document.querySelectorAll(".tab-button").forEach(button => {
         button.addEventListener("click", () => {
-            // Remove active class from all buttons and tabs
             document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
             
-            // Add active class to clicked button
             button.classList.add("active");
-            
-            // Show corresponding tab
             const tabId = `${button.dataset.tab}-tab`;
             document.getElementById(tabId).classList.add("active");
         });
     });
 }
 
-// Initialize the game when the DOM is loaded
+// Initialize the game
 document.addEventListener("DOMContentLoaded", initGame);
