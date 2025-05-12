@@ -1,9 +1,9 @@
 :root {
-    --primary: #4a2c82;
-    --secondary: #6a3cb5;
-    --accent: #ff6b6b;
+    --primary: #2a1b3d;
+    --secondary: #44318d;
+    --accent: #d83f87;
     --dark: #1a1a2e;
-    --light: #f1f1f1;
+    --light: #e6e6e6;
     --success: #4caf50;
     --danger: #f44336;
     --warning: #ff9800;
@@ -14,7 +14,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -27,7 +27,6 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    position: relative;
 }
 
 .game-header {
@@ -38,23 +37,12 @@ body {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     border-radius: 10px;
     margin-bottom: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: pulse 2s infinite alternate;
-}
-
-@keyframes pulse {
-    from {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-    to {
-        box-shadow: 0 5px 25px rgba(106, 60, 181, 0.6);
-    }
+    border: 1px solid var(--accent);
 }
 
 .game-header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .money-display {
@@ -62,16 +50,14 @@ body {
 }
 
 #money {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: bold;
     color: var(--accent);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .money-per-second {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--success);
-    opacity: 0.8;
 }
 
 .tabs {
@@ -82,23 +68,21 @@ body {
 
 .tab-button {
     flex: 1;
-    padding: 15px;
+    padding: 12px;
     background: var(--primary);
     border: none;
     color: var(--light);
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
     border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .tab-button:hover {
     background: var(--secondary);
-    transform: translateY(-3px);
 }
 
 .tab-button.active {
@@ -109,12 +93,6 @@ body {
 
 .tab-content {
     display: none;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 .tab-content.active {
@@ -122,94 +100,77 @@ body {
 }
 
 .drug-market, .drug-inventory, .workers-section {
-    background: rgba(26, 26, 46, 0.7);
-    padding: 20px;
+    background: rgba(42, 27, 61, 0.7);
+    padding: 15px;
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     border: 1px solid var(--primary);
 }
 
 h2 {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     color: var(--accent);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    font-size: 1.2rem;
 }
 
 .drug-list, .worker-list, .upgrades-list, .properties-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
+    gap: 12px;
 }
 
 .drug-card, .worker-card, .upgrade-card, .property-card {
     background: var(--primary);
-    padding: 15px;
+    padding: 12px;
     border-radius: 8px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.drug-card:hover, .worker-card:hover, .upgrade-card:hover, .property-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.drug-card::before, .worker-card::before, .upgrade-card::before, .property-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--accent);
-}
-
 .drug-name, .worker-name, .upgrade-name, .property-name {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: var(--accent);
 }
 
 .drug-price, .worker-price, .upgrade-price, .property-price {
-    margin-bottom: 10px;
-    color: var(--light);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
 }
 
 .drug-quantity, .worker-stats, .upgrade-description, .property-description {
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-    opacity: 0.8;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    opacity: 0.9;
 }
 
 button {
     background: var(--accent);
     color: var(--dark);
     border: none;
-    padding: 8px 15px;
+    padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: all 0.3s ease;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
+    margin-top: 5px;
+    width: 100%;
 }
 
 button:hover {
-    background: #ff5252;
-    transform: scale(1.05);
+    background: #d83f87;
 }
 
 button:disabled {
-    background: #cccccc;
+    background: #555;
     cursor: not-allowed;
-    transform: none;
 }
 
 .notifications {
@@ -223,23 +184,11 @@ button:disabled {
 .notification {
     background: var(--primary);
     color: white;
-    padding: 15px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
     border-radius: 5px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
-    position: relative;
-    overflow: hidden;
-    border-left: 5px solid var(--accent);
-}
-
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateY(20px); }
+    border-left: 4px solid var(--accent);
+    font-size: 0.9rem;
 }
 
 .notification.success {
@@ -254,31 +203,11 @@ button:disabled {
     border-left-color: var(--warning);
 }
 
-.progress-bar {
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    margin-top: 10px;
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    width: 100%;
-    animation: progressBar 3s linear forwards;
-}
-
-@keyframes progressBar {
-    from { width: 100%; }
-    to { width: 0%; }
-}
-
 .worker-type {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     padding: 3px 6px;
     border-radius: 3px;
     background: var(--secondary);
@@ -297,7 +226,6 @@ button:disabled {
     color: var(--dark);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .tabs {
         flex-direction: column;
@@ -315,5 +243,11 @@ button:disabled {
     
     .money-display {
         text-align: center;
+    }
+    
+    .notifications {
+        width: 90%;
+        left: 5%;
+        right: 5%;
     }
 }
