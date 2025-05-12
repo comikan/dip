@@ -81,10 +81,6 @@ body {
     gap: 8px;
 }
 
-.tab-button:hover {
-    background: var(--secondary);
-}
-
 .tab-button.active {
     background: var(--accent);
     color: var(--dark);
@@ -127,6 +123,7 @@ h2 {
     padding: 12px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
 
 .drug-name, .worker-name, .upgrade-name, .property-name {
@@ -156,16 +153,8 @@ button {
     cursor: pointer;
     font-weight: bold;
     font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
     margin-top: 5px;
     width: 100%;
-}
-
-button:hover {
-    background: #d83f87;
 }
 
 button:disabled {
@@ -224,6 +213,16 @@ button:disabled {
 .worker-type.street-rat {
     background: var(--warning);
     color: var(--dark);
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    background: var(--dark);
+    color: var(--light);
+    border: 1px solid var(--accent);
+    margin-bottom: 8px;
 }
 
 @media (max-width: 768px) {
