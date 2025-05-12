@@ -59,8 +59,9 @@ function gameLoop() {
             const drug = gameState.drugs[worker.assignedDrug];
             const sellAmount = Math.min(worker.capacity, drug.owned);
             
-            // Fixed: Only use sellPrice for income
-            incomeThisTick += (sellAmount * drug.sellPrice) / worker.sellSpeed;
+            // Only use sellPrice for income
+            const profit = Math.floor((sellAmount * drug.sellPrice) / worker.sellSpeed);
+            incomeThisTick += profit;
             drug.owned -= sellAmount;
             
             // Police bust chance
@@ -73,12 +74,12 @@ function gameLoop() {
     // Add income from properties
     Object.values(gameState.properties).forEach(property => {
         if (property.owned && property.income) {
-            incomeThisTick += property.income * deltaTime;
+            incomeThisTick += Math.floor(property.income * deltaTime);
         }
     });
     
-    gameState.money += incomeThisTick;
-    gameState.moneyPerSecond = incomeThisTick / deltaTime;
+    gameState.money += Math.floor(incomeThisTick);
+    gameState.moneyPerSecond = Math.floor(incomeThisTick / deltaTime);
     
     updateUI();
 }
@@ -158,7 +159,6 @@ function updateDrugsUI() {
     inventoryEl.innerHTML = "";
     
     Object.entries(gameState.drugs).forEach(([id, drug]) => {
-        // Buy drug card
         const buyCard = document.createElement("div");
         buyCard.className = "drug-card";
         buyCard.innerHTML = `
@@ -174,7 +174,6 @@ function updateDrugsUI() {
         `;
         buyDrugsEl.appendChild(buyCard);
         
-        // Inventory card
         if (drug.owned > 0) {
             const invCard = document.createElement("div");
             invCard.className = "drug-card";
@@ -192,7 +191,6 @@ function updateDrugsUI() {
         }
     });
     
-    // Add event listeners to new buttons
     document.querySelectorAll(".buy-btn").forEach(btn => {
         btn.addEventListener("click", () => buyDrug(btn.dataset.drug, 1));
     });
@@ -217,7 +215,6 @@ function updateWorkersUI() {
     hireWorkersEl.innerHTML = "";
     yourWorkersEl.innerHTML = "";
     
-    // Available workers to hire
     gameState.availableWorkers.forEach(worker => {
         const workerCard = document.createElement("div");
         workerCard.className = "worker-card";
@@ -236,7 +233,6 @@ function updateWorkersUI() {
         hireWorkersEl.appendChild(workerCard);
     });
     
-    // Hired workers
     gameState.workers.forEach(worker => {
         const workerCard = document.createElement("div");
         workerCard.className = "worker-card";
@@ -261,7 +257,6 @@ function updateWorkersUI() {
         yourWorkersEl.appendChild(workerCard);
     });
     
-    // Add event listeners
     document.querySelectorAll(".hire-btn").forEach(btn => {
         btn.addEventListener("click", () => hireWorker(parseInt(btn.dataset.workerId)));
     });
@@ -398,7 +393,6 @@ function fireWorker(workerId) {
     const worker = gameState.workers[workerIndex];
     gameState.workers.splice(workerIndex, 1);
     
-    // Get some money back
     const refund = Math.floor(worker.price * 0.25);
     gameState.money += refund;
     
@@ -446,9 +440,8 @@ function buyUpgrade(upgradeId) {
     gameState.money -= upgrade.price;
     upgrade.bought = true;
     
-    // Special case for protection upgrade
     if (upgradeId === 'gun') {
-        gameState.protection = 0.5; // 50% protection
+        gameState.protection = 0.5;
     } else if (upgrade.effect) {
         upgrade.effect();
     }
@@ -503,22 +496,17 @@ function showNotification(message, type = "info") {
 
 // Event listeners
 function setupEventListeners() {
-    // Tab switching
     document.querySelectorAll(".tab-button").forEach(button => {
         button.addEventListener("click", () => {
-            // Remove active class from all buttons and tabs
             document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
             
-            // Add active class to clicked button
             button.classList.add("active");
-            
-            // Show corresponding tab
             const tabId = `${button.dataset.tab}-tab`;
             document.getElementById(tabId).classList.add("active");
         });
     });
 }
 
-// Initialize the game when the DOM is loaded
+// Initialize the game
 document.addEventListener("DOMContentLoaded", initGame);
