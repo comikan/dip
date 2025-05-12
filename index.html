@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIP - Drug Empire Simulator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1><i class="fas fa-cannabis"></i> DIP</h1>
+            <div class="money-display">
+                <span id="money">$0</span>
+                <div class="money-per-second">+$0/sec</div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="drugs"><i class="fas fa-pills"></i> Drugs</button>
+            <button class="tab-button" data-tab="workers"><i class="fas fa-users"></i> Workers</button>
+            <button class="tab-button" data-tab="upgrades"><i class="fas fa-arrow-up"></i> Upgrades</button>
+            <button class="tab-button" data-tab="properties"><i class="fas fa-house"></i> Properties</button>
+        </div>
+
+        <div class="tab-content active" id="drugs-tab">
+            <div class="drug-market">
+                <h2><i class="fas fa-shopping-cart"></i> Buy Drugs</h2>
+                <div class="drug-list" id="buy-drugs">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+            <div class="drug-inventory">
+                <h2><i class="fas fa-box-open"></i> Your Inventory</h2>
+                <div class="drug-list" id="inventory">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="workers-tab">
+            <div class="workers-section">
+                <h2><i class="fas fa-user-plus"></i> Hire Workers</h2>
+                <div class="worker-list" id="hire-workers">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+            <div class="workers-section">
+                <h2><i class="fas fa-users-cog"></i> Your Crew</h2>
+                <div class="worker-list" id="your-workers">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="upgrades-tab">
+            <div class="upgrades-list" id="upgrades">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <div class="tab-content" id="properties-tab">
+            <div class="properties-list" id="properties">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <div class="notifications" id="notifications"></div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
